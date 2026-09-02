@@ -62,11 +62,7 @@ fn intern(s: &str) -> &'static str {
 /// assert_eq!(from_literal, from_owned);
 /// assert!(std::ptr::eq(from_literal.as_str(), from_owned.as_str()));
 /// ```
-#[expect(
-    clippy::derived_hash_with_manual_eq,
-    reason = "pointer-equal implies content-equal, so Eq implies the same hash"
-)]
-#[derive(Debug, Clone, Copy, Eq, Hash)]
+#[derive(Debug, Clone, Copy, Eq)]
 pub struct Ident(&'static str);
 
 impl Ident {
@@ -107,11 +103,20 @@ impl Ident {
 }
 
 // Every constructor goes through `intern`, so pointer equality is equivalent
-// to content equality. The derived Hash remains content-based, preserving the
-// `Borrow<str>` lookup contract.
+// to content equality.
 impl PartialEq for Ident {
     fn eq(&self, other: &Self) -> bool {
         std::ptr::eq(self.0, other.0)
+    }
+}
+
+// Hash the text, not the address: `Borrow<str>` requires an `Ident` and the
+// `str` it borrows as to hash identically, and pointer-equal implies
+// content-equal, so `Eq` still implies equal hashes. Written by hand rather
+// than derived so no toolchain's clippy can object to the derive/manual mix.
+impl std::hash::Hash for Ident {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.0.hash(state);
     }
 }
 
