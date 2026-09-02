@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# scripts/check: the one command that has to be green before integrate.
+#
+# Runs the crate's cargo checks in order and stops at the first failure. The
+# last step, `cargo package --list`, is a sanity check that the scaffolding
+# excluded via Cargo.toml's `exclude` (`.workspaces`, `docs/tickets`,
+# `kata.toml`, `.github`) never sneaks into the published package.
+#
+# Run it from a clean working copy so the listing you see is the listing that
+# ships. This repo has no colocated `.git`, so `cargo package`'s dirty-tree
+# guard never fires and `--allow-dirty` is never needed.
+set -euo pipefail
+
+# Repo root is the parent of this script's directory, regardless of cwd.
+cd "$(dirname "$(dirname "$(readlink -f "$0")")")"
+
+run() {
+    echo "==> $*"
+    "$@"
+}
+
+run cargo fmt --check
+run cargo clippy --all-targets --all-features -- -D warnings
+run cargo clippy --all-targets --no-default-features -- -D warnings
+run cargo test --all-features
+run cargo test --no-default-features
+RUSTDOCFLAGS="-D warnings" run cargo doc --all-features --no-deps
+
+echo "==> cargo package --list"
+listing=$(cargo package --list)
+echo "$listing"
+for forbidden in .workspaces docs/tickets kata.toml .github; do
+    if grep -q -- "$forbidden" <<<"$listing"; then
+        echo "error: cargo package --list includes forbidden path: $forbidden" >&2
+        exit 1
+    fi
+done
+
+echo "==> all checks passed"
