@@ -1,0 +1,24 @@
+# jj-kata per-repo config (github: msmorgan/jj-kata). Requires jj-sensei's
+# workspace boundaries (the `/jj-sensei:boundaries` skill installs them).
+
+# Feature workspaces stay inside the coordinator checkout. The directory is
+# gitignored and excluded from `cargo package`.
+workspace_dir = ".workspaces"
+
+[items]
+# Tickets are plain files whose folder is their status, so the bundled Kanban
+# driver owns the claim/complete/return moves outright.
+driver = "kanban"
+
+# Claims publish immediately through a bookmarked anchor on the default line, so
+# concurrent sessions can see what is already taken.
+visibility = "shared"
+
+[kanban]
+root = "docs/tickets"
+wip = "wip"
+done = "done"
+patterns = ["*.md"]
+
+# Triage folders in priority order; see docs/tickets/README.md.
+columns = ["planned", "maybe", "wip", "done"]
