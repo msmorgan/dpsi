@@ -1,0 +1,19 @@
+# Rust 2024 / "Version Two" formatting. style_edition is the stabilized
+# successor of `version = "Two"`; `edition` comes from Cargo.toml when run via
+# `cargo fmt`.
+style_edition = "2024"
+
+# --- stable options -------------------------------------------------------
+newline_style = "Unix"
+single_line_if_else_max_width = 80
+single_line_let_else_max_width = 80
+use_field_init_shorthand = true
+use_try_shorthand = true
+
+# --- nightly-only: applied by `cargo +nightly fmt`, warned-and-ignored on
+# --- stable ---------------------------------------------------------------
+# One fully-pathed `use` per item, grouped std / external / crate.
+imports_granularity = "Item"
+group_imports = "StdExternalCrate"
+wrap_comments = true
+format_code_in_doc_comments = true

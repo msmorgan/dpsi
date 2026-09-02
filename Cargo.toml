@@ -1,0 +1,29 @@
+[package]
+name = "dpsi"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+description = "The dumbest possible string interner: a Copy, lifetime-free Ident with pointer equality"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/msmorgan/dpsi"
+readme = "README.md"
+keywords = ["interner", "string", "symbol", "intern"]
+categories = ["data-structures", "memory-management"]
+# Repo scaffolding that has no business in the published crate.
+exclude = [".workspaces", "docs/tickets", "kata.toml", ".github"]
+
+[features]
+serde = ["dep:serde"]
+
+[dependencies]
+# Optional and without `derive`: the impls are hand-written so enabling the
+# feature pulls in nothing beyond serde itself.
+serde = { version = "1", optional = true }
+
+[package.metadata.docs.rs]
+all-features = true
+
+[lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+# Every #[allow]/#[expect] must carry a `reason`.
+allow_attributes_without_reason = "warn"
