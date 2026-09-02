@@ -10,7 +10,7 @@ readme = "README.md"
 keywords = ["interner", "string", "symbol", "intern"]
 categories = ["data-structures", "memory-management"]
 # Repo scaffolding that has no business in the published crate.
-exclude = [".workspaces", "docs/tickets", "kata.toml", ".github"]
+exclude = [".workspaces", "docs/tickets", "kata.toml", ".github", "scripts"]
 
 [features]
 serde = ["dep:serde"]
