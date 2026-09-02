@@ -10,6 +10,9 @@ use std::collections::HashSet;
 use std::sync::LazyLock;
 use std::sync::RwLock;
 
+mod by_addr;
+pub use by_addr::ByAddr;
+
 /// The process-wide pool of interned strings.
 static POOL: LazyLock<RwLock<HashSet<&'static str>>> = LazyLock::new(RwLock::default);
 
