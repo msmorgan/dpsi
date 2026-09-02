@@ -1,8 +1,6 @@
-//! The dumbest possible string interner (pronounced “Dipsy”).
-//!
-//! [`Ident`] is a `Copy`, lifetime-free handle to an interned string whose
-//! equality is a single pointer comparison.
-
+// The README is the crate-level documentation, so its examples are doctests
+// and the two texts can never drift apart.
+#![doc = include_str!("../README.md")]
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
 
