@@ -210,8 +210,20 @@ mod tests {
 
     #[test]
     fn interning_is_thread_safe() {
-        let interns: Vec<_> = (0..8)
-            .map(|_| std::thread::spawn(|| Ident::new("DumbestPossibleStringInterner")))
+        // Spawn every thread before joining any, and release them through a
+        // barrier, so all eight actually race on the read-then-write path.
+        let barrier = std::sync::Arc::new(std::sync::Barrier::new(8));
+        let handles: Vec<_> = (0..8)
+            .map(|_| {
+                let barrier = std::sync::Arc::clone(&barrier);
+                std::thread::spawn(move || {
+                    barrier.wait();
+                    Ident::new("DumbestPossibleStringInterner")
+                })
+            })
+            .collect();
+        let interns: Vec<_> = handles
+            .into_iter()
             .map(|thread| thread.join().unwrap())
             .collect();
 
@@ -241,6 +253,8 @@ mod tests {
 
     #[test]
     fn get_does_not_intern() {
+        // Negative assertions share one pool with every other test, so this
+        // text must stay unique across the whole suite.
         let absent = "get-never-interned-text";
 
         assert_eq!(Ident::get(absent), None);

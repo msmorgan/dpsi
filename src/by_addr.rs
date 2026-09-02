@@ -180,6 +180,7 @@ mod tests {
 
         // Text that was never interned has no key to probe with at all, which
         // is the miss `Ident::get` is there to give without interning it.
+        // Shares one pool with every other test: keep this text unique.
         assert_eq!(Ident::get("by-addr-map-never-interned"), None);
         assert!(!map.contains_key(&ByAddr(Ident::new("by-addr-map-other"))));
     }

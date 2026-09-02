@@ -17,7 +17,7 @@ serde = ["dep:serde"]
 
 [dependencies]
 # Optional and without `derive`: the impls are hand-written so enabling the
-# feature pulls in nothing beyond serde itself.
+# feature pulls in no proc-macro crates (serde_derive, syn, quote).
 serde = { version = "1", optional = true }
 
 [dev-dependencies]

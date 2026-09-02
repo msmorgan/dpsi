@@ -2,7 +2,8 @@
 //!
 //! The wire form of an [`Ident`] is simply its text: it serializes as a
 //! string and deserializes from one, interning whatever it reads. That means
-//! an `Ident` is interchangeable with a `String` or `&str` in any format, and
+//! an `Ident` is interchangeable with a `String` or `&str` in any format that
+//! delivers strings as text or as UTF-8 bytes, and
 //! a value read back is pointer-equal to [`Ident::new`] of the same text.
 //!
 //! Some formats also have an *identifier position* — enum variant names and,
@@ -12,7 +13,7 @@
 //!
 //! The `serde` dependency is optional and does not enable `derive`; every
 //! impl here is written by hand so that turning the feature on pulls in
-//! nothing beyond `serde` itself.
+//! no proc-macro crates (`serde_derive`, `syn`, `quote`).
 //!
 //! [`Deserializer::deserialize_identifier`]: serde::Deserializer::deserialize_identifier
 
@@ -37,6 +38,14 @@ impl serde::de::Visitor<'_> for IdentVisitor {
     fn visit_str<E: serde::de::Error>(self, value: &str) -> Result<Self::Value, E> {
         Ok(Ident::new(value))
     }
+
+    // `String`'s visitor accepts bytes too, and some binary formats answer
+    // `deserialize_str` that way; match it so the two stay interchangeable.
+    fn visit_bytes<E: serde::de::Error>(self, value: &[u8]) -> Result<Self::Value, E> {
+        std::str::from_utf8(value)
+            .map(Ident::new)
+            .map_err(|_| E::invalid_value(serde::de::Unexpected::Bytes(value), &self))
+    }
 }
 
 // Serialized as the bare string, so an `Ident` is wire-compatible with the
@@ -60,6 +69,8 @@ impl<'de> Deserialize<'de> for Ident {
 }
 
 /// A [`DeserializeSeed`] that reads an [`Ident`] from an identifier position.
+///
+/// Requires the `serde` feature.
 ///
 /// [`Ident`]'s ordinary [`Deserialize`] implementation reads string *values*
 /// through [`deserialize_str`]. Identifier positions — enum variant names, and
@@ -162,6 +173,21 @@ mod tests {
             // An empty variant list: the seed accepts whatever token arrives.
             deserializer.deserialize_enum("Variant", &[], VariantVisitor)
         }
+    }
+
+    #[test]
+    fn accepts_utf8_bytes_like_string_does() {
+        use serde::Deserialize;
+        use serde::de::IntoDeserializer;
+        use serde::de::value::BytesDeserializer;
+        use serde::de::value::Error;
+
+        let bytes: BytesDeserializer<'_, Error> = b"serde-bytes-path".into_deserializer();
+        let ident = Ident::deserialize(bytes).unwrap();
+        assert_eq!(ident, Ident::new("serde-bytes-path"));
+
+        let invalid: BytesDeserializer<'_, Error> = b"\xff\xfe".into_deserializer();
+        assert!(Ident::deserialize(invalid).is_err());
     }
 
     #[test]

@@ -122,7 +122,8 @@ assert!(Ident::get("never-interned").is_none());
 
 The optional `serde` feature adds `Serialize` and `Deserialize` for `Ident`
 and `ByAddr`. It does not enable serde's `derive`; every impl is hand-written,
-so turning the feature on pulls in nothing beyond `serde` itself.
+so turning the feature on pulls in no proc-macro crates: no `serde_derive`,
+no `syn`, no `quote`.
 
 ```toml
 [dependencies]
@@ -130,7 +131,7 @@ dpsi = { version = "0.1", features = ["serde"] }
 ```
 
 The wire form is just the text. An `Ident` is interchangeable with a `String`
-or a `&str` in any format, and a value read back is pointer-equal to
+or a `&str` in any format that delivers strings as text or as UTF-8 bytes, and a value read back is pointer-equal to
 `Ident::new` of the same text. Deserializing interns, so everything in the
 memory section applies to whatever you deserialize.
 
@@ -211,7 +212,7 @@ of the others. This crate is the smallest thing that works.
 - **`no_std`.** It would add two dependencies, a pool trait, and an allocator
   hook to a crate whose entire pitch is zero dependencies and one screen of
   code, and no one has asked for it. The design is written down and deferred
-  in `docs/tickets/maybe/no-std-feature.md`, along with why a spinlock-backed
+  in [`docs/tickets/maybe/no-std-feature.md`](https://github.com/msmorgan/dpsi/blob/main/docs/tickets/maybe/no-std-feature.md), along with why a spinlock-backed
   pool is a bad fit for the targets that would want it.
 - **Pool customization.** A public pool would turn the canonical-pointer
   invariant into a contract downstream code can violate, which silently breaks
@@ -222,18 +223,21 @@ of the others. This crate is the smallest thing that works.
 
 ## Contributing
 
-`scripts/check` is the gate. It runs `cargo fmt --check`, clippy at
+[`scripts/check`](https://github.com/msmorgan/dpsi/blob/main/scripts/check) in the repository is the gate. It runs `cargo fmt --check`, clippy at
 `-D warnings` in both feature configurations, the tests in both, `cargo doc`
 with `-D warnings`, and a `cargo package --list` check that repo scaffolding
 stays out of the published crate. It has to be green before anything lands.
 
-Work is tracked as files: one ticket per unit of work under `docs/tickets/`,
-whose folder is its status. `docs/tickets/README.md` explains the layout.
+Work is tracked as files: one ticket per unit of work under
+[`docs/tickets/`](https://github.com/msmorgan/dpsi/tree/main/docs/tickets),
+whose folder is its status. Its README explains the layout.
 
 ## License
 
-Licensed under either of [Apache License, Version 2.0](LICENSE-APACHE) or
-[MIT license](LICENSE-MIT) at your option.
+Licensed under either of
+[Apache License, Version 2.0](https://github.com/msmorgan/dpsi/blob/main/LICENSE-APACHE)
+or [MIT license](https://github.com/msmorgan/dpsi/blob/main/LICENSE-MIT) at
+your option.
 
 Unless you explicitly state otherwise, any contribution intentionally submitted
 for inclusion in the work by you, as defined in the Apache-2.0 license, shall

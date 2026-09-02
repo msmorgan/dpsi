@@ -21,5 +21,8 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
 
+      - name: Verify Cargo.lock is current
+        run: cargo fetch --locked
+
       - name: Run checks
-        run: scripts/check
+        run: bash scripts/check
