@@ -180,6 +180,11 @@ impl PartialEq<&str> for Ident {
     }
 }
 
+#[cfg(feature = "serde")]
+mod serde_impls;
+#[cfg(feature = "serde")]
+pub use serde_impls::IdentSeed;
+
 #[cfg(test)]
 mod tests {
     use std::collections::HashMap;
