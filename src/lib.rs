@@ -106,7 +106,7 @@ impl Ident {
 // to content equality.
 impl PartialEq for Ident {
     fn eq(&self, other: &Self) -> bool {
-        std::ptr::eq(self.0, other.0)
+        std::ptr::eq(self.0.as_ptr(), other.0.as_ptr())
     }
 }
 

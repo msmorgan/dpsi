@@ -4,7 +4,7 @@
 # Runs the crate's cargo checks in order and stops at the first failure. The
 # last step, `cargo package --list`, is a sanity check that the scaffolding
 # excluded via Cargo.toml's `exclude` (`.workspaces`, `docs/tickets`,
-# `kata.toml`, `.github`) never sneaks into the published package.
+# `kata.toml`, `.github`, `scripts`) never sneaks into the published package.
 #
 # Run it from a clean working copy so the listing you see is the listing that
 # ships. This repo has no colocated `.git`, so `cargo package`'s dirty-tree
@@ -29,7 +29,7 @@ RUSTDOCFLAGS="-D warnings" run cargo doc --all-features --no-deps
 echo "==> cargo package --list"
 listing=$(cargo package --list)
 echo "$listing"
-for forbidden in .workspaces docs/tickets kata.toml .github; do
+for forbidden in .workspaces docs/tickets kata.toml .github scripts; do
     if grep -q -- "$forbidden" <<<"$listing"; then
         echo "error: cargo package --list includes forbidden path: $forbidden" >&2
         exit 1
